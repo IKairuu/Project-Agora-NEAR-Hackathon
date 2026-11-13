@@ -164,11 +164,11 @@ function LinkWallet({ onDone, back, signIn = false }: { onDone: () => void; back
       {acct ? (
         <>
           <div className="banner"><Icon name="wallet" /><div className="grow"><b className="mono" style={{ fontWeight: 500 }}>{acct}</b><span className="muted small">Sign a short message to prove this account is yours. It is not a transaction and costs nothing.</span></div></div>
-          <button className="btn primary wide" disabled={!!busy} aria-busy={busy === 'sign'} onClick={() => void link()}>{busy === 'sign' ? 'Waiting for your wallet…' : signIn ? 'Sign and sign in' : 'Sign and link'}</button>
+          <button className="btn primary wide" disabled={!!busy} aria-busy={busy === 'sign'} onClick={() => void link()}>{busy === 'sign' ? <><span className="spin" />Waiting for your wallet…</> : signIn ? 'Sign and sign in' : 'Sign and link'}</button>
           <button className="lk" disabled={!!busy} onClick={() => void other()}>Use another wallet</button>
         </>
       ) : (
-        <button className="btn primary wide" disabled={!!busy} aria-busy={busy === 'pick'} onClick={() => void pick()}><Icon name="wallet" />{busy === 'load' ? 'Loading wallets…' : busy === 'pick' ? 'Waiting for your wallet…' : 'Choose a wallet'}</button>
+        <button className="btn primary wide" disabled={!!busy} aria-busy={busy === 'pick'} onClick={() => void pick()}><Icon name="wallet" />{busy === 'load' ? <><span className="spin" />Loading wallets…</> : busy === 'pick' ? <><span className="spin" />Waiting for your wallet…</> : 'Choose a wallet'}</button>
       )}
       {err && <p className="small" role="alert" style={{ color: 'var(--block, #c0392b)' }}>{err}</p>}
       <div className="acts"><button className="btn" onClick={back}>Back</button></div>
@@ -225,7 +225,7 @@ function WalletMove({ op }: { op: 'deposit' | 'withdraw' }) {
       <div className="field"><label htmlFor="wm-amt">Amount (USDC)</label><input className="input num" id="wm-amt" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} />
         {op === 'deposit' ? <WalletLine /> : <span className="hint">{usd(free(s))} USDC free in AGORA</span>}</div>
       <div className="banner hold"><Icon name="lock" /><div className="grow"><span>Your wallet opens to confirm. It needs your full-access key, so agent keys can never do this.</span></div></div>
-      <div className="acts"><Cancel /><button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>{busy ? 'Waiting for your wallet…' : 'Confirm in your wallet'}</button></div>
+      <div className="acts"><Cancel /><button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>{busy ? <><span className="spin" />Waiting for your wallet…</> : 'Confirm in your wallet'}</button></div>
     </Frame>
   );
 }
@@ -248,7 +248,7 @@ function LiveSend() {
       <div className="field"><label htmlFor="snd-to">To</label><input className="input mono" id="snd-to" placeholder="name.testnet" value={to} onChange={(e) => setTo(e.target.value.toLowerCase())} /></div>
       <div className="field"><label htmlFor="snd-amt">Amount</label><input className="input num" id="snd-amt" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} /><WalletLine /></div>
       <div className="banner hold"><Icon name="lock" /><div className="grow"><span>Sends from your NEAR wallet, not from your AGORA balance. Your wallet opens to confirm; agent keys can't send.</span></div></div>
-      <div className="acts"><Cancel /><button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>{busy ? 'Waiting for your wallet…' : 'Confirm in your wallet'}</button></div>
+      <div className="acts"><Cancel /><button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>{busy ? <><span className="spin" />Waiting for your wallet…</> : 'Confirm in your wallet'}</button></div>
     </Frame>
   );
 }
