@@ -536,7 +536,7 @@ Import each JSON file in [`agents/`](agents) into n8n (**Workflows → Import fr
 
 ## Team
 
-**Eight members, one team,** led by project manager **Jhon Lloyd M. Valencia**. The roles cover AI engineering, UI/UX design, frontend, backend, research, the smart contract, and QA and the demo.
+**Eight members, one team,** led by project manager **Jhon Lloyd M. Valencia**. The roles cover project management, AI automation, UI/UX design, front end, back end, research and quality assurance.
 
 <details>
 <summary><b>Members and roles</b></summary>
@@ -546,13 +546,13 @@ Import each JSON file in [`agents/`](agents) into n8n (**Workflows → Import fr
 | Name | Role |
 |---|---|
 | **Jhon Lloyd M. Valencia** | Project manager |
-| **Kyle Allen M. Abandia** | AI Automation Engineer |
+| **Kyle Allen M. Abandia** | Co-project manager, AI Automation Engineer |
 | **Siegfred Josh L. Calayag** | UI/UX designer |
-| **Maurenzio Franck M. Altamarino** | *Role to be confirmed* |
-| **Maria Veronica G. Amparo** | *Role to be confirmed* |
-| **Mary Rose P. de los Reyes** | *Role to be confirmed* |
-| **Leanne Elech P. Rosales** | *Role to be confirmed* |
-| **Raphael Augustin V. Dator** | *Role to be confirmed* |
+| **Maurenzio Franck M. Altamarino** | Front-end developer |
+| **Maria Veronica G. Amparo** | Researcher |
+| **Mary Rose P. de los Reyes** | Back-end developer |
+| **Leanne Elech P. Rosales** | Back-end developer |
+| **Raphael Augustin V. Dator** | Quality assurance |
 
 </details>
 
