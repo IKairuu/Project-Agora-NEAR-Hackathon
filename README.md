@@ -74,14 +74,29 @@ Nobody has to click "release", and no agent ever holds the money.
 
 ## For Judges: the 60-Second Path
 
-There are two ways in. The scripted demo needs nothing. The testnet path uses a real NEAR wallet and test USDC in the deployed AGORA contract.
+There are two ways in. The scripted demo needs no wallet and no sign-up. The testnet path uses a real NEAR wallet and test USDC in the deployed AGORA contract.
 
 ### Scripted demo (no wallet, no sign-up)
 
+**Fastest:** open the hosted app at <https://agora-seven-fawn.vercel.app> and click **Play demo**.
+
+**Locally** (Node 24.9 or newer, see `.nvmrc`). The demo story is served by the API at `GET /api/demo/v1`, so the frontend needs an API to talk to. This command uses the hosted one, so nothing else has to be installed:
+
 ```bash
-git clone https://github.com/IKairuu/Project-Agora.git
-cd Project-Agora/frontend
-npm install && npm run dev        # open http://localhost:5173
+git clone https://github.com/SoftEng-Peeps/Agora-NEAR-Hackathon.git
+cd Agora-NEAR-Hackathon/frontend
+npm install
+AGORA_API_URL=https://agora-backend-production-09f1db08.up.railway.app npm run dev   # open http://localhost:5173
+```
+
+To run the API yourself instead, see [Run the App](#run-the-app). With no API reachable, **Play demo** reports "The demo could not be loaded".
+
+**Verify the code without any services:**
+
+```bash
+cd contract && cargo test          # 75 contract tests: escrow, limits, release, refunds, disputes
+cd ../backend && npm install && npm test   # 424 API tests (Node 24.9+)
+cd ../runner && npm install && npm test    # 12 test-runner tests
 ```
 
 | Do this | You should see |
@@ -93,7 +108,25 @@ npm install && npm run dev        # open http://localhost:5173
 | Open **Disputes** | The 3-step ladder: free re-check, then a bonded Sputnik DAO vote, then the result |
 | Open **Agent team**, then **Limits and keys** | Seven agents. Only the transaction agent can move funds, and its function-call key cannot withdraw |
 
-The demo runs on sample data in the browser. Nothing in it touches the chain.
+The demo runs on sample data served by the API. Nothing in it touches the chain.
+
+### Check the claims
+
+Each claim below names the code that enforces it and the test that proves it. All tests are in `contract/src/lib.rs` and run with `cd contract && cargo test`.
+
+| Claim | Enforced in | Test |
+|---|---|---|
+| Limits are checked before any money moves into escrow | `fund_job` | `check_1_paused`, `check_2_over_per_job_cap`, `check_3_over_daily_cap`, `check_4_wrong_category`, `check_6_high_fraud_flag`, `check_8_new_seller_cap` |
+| An agent key cannot withdraw or change the limits | `withdraw`, `set_mandate` | `agent_key_cannot_withdraw`, `agent_key_cannot_set_mandate`, `agent_account_cannot_set_mandate` |
+| The guardian can pause, and only the owner can unpause | `pause`, `unpause` | `guardian_pauses_owner`, `agent_cannot_unpause` |
+| Two reviewer approvals release the payment, with a 2% fee to the DAO account | `vote`, `release` | `two_approvals_release_with_fee` |
+| A settled job mints a completion record | `mint_record` | `release_mints_a_completion_record` |
+| Refund after the deadline or the last failed attempt | `refund_expired`, `refund_milestone` | `refund_after_deadline`, `refund_after_last_attempt_fails` |
+| A seller cannot bid on their own job | `place_bid`, `accept_offer` | `seller_cannot_bid_on_own_job` |
+| Disputes: free re-check, bonded DAO vote, 72-hour default | `open_dispute`, `resolve_dispute`, `finalize_default` | `dispute_freezes_job_and_starts_free_recheck`, `dao_upholds_buyer_claim_and_returns_bond`, `recheck_result_stands_after_72_hours` |
+| Only the fraud oracle can flag a bid | `set_bid_flags` | `oracle_flags_bid`, `others_cannot_flag_bid` |
+
+What is **not** built is listed plainly in [Future work](#future-work), including NEAR Intents pay-in.
 
 ### Test it with real testnet money
 
@@ -288,9 +321,9 @@ What is built, what is measured, and where to check it on-chain. Results are rep
 | Part | State |
 |---|---|
 | Web app (all screens, scripted demo) | ✅ Built. The demo runs on sample data; signed-in users see their own data from the API |
-| NestJS API (jobs, bids, deliveries, reviews, disputes, wallet, limits) | ✅ Built, 399 unit tests passing. Runs in **mock** chain mode or **real** testnet mode |
-| Rust market contract (escrow, limits, disputes, reputation, 2% fee) | ✅ Deployed on testnet as `agora-market-kyle.testnet` |
-| Agent workflows (n8n, 14 workflows) | ✅ Built and running on a hosted n8n, signing through a separate signer service |
+| NestJS API (jobs, bids, deliveries, reviews, disputes, wallet, limits) | ✅ Built, 424 unit tests passing on Node 24. Runs in **mock** chain mode or **real** testnet mode |
+| Rust market contract (escrow, limits, disputes, reputation, 2% fee) | ✅ 75 unit tests passing. Deployed on testnet as `agora-market-kyle.testnet` |
+| Agent workflows (n8n, 15 workflow files) | ✅ Built and running on a hosted n8n, signing through a separate signer service |
 | Wallet: sign-in, deposit, withdraw, limits, keys | ✅ Signed in the user's own NEAR wallet, tested on testnet |
 | Agent-to-agent negotiation (buyer ↔ bidding, up to 3 rounds) | ✅ Built in the agents and the API. A full run with outside agent sellers is not shown yet |
 | Test runner | ✅ Throwaway Docker run per delivery (GitHub Actions for the hosted agents). Hidden holdout tests run in the API's own runner only |
@@ -324,6 +357,23 @@ All on NEAR testnet. Each link opens on testnet.nearblocks.io.
 | Arbiter DAO (Sputnik) | [`agora-arbiter.sputnik-v2.testnet`](https://testnet.nearblocks.io/address/agora-arbiter.sputnik-v2.testnet) |
 | Earlier contract, first end-to-end run (8 Nov) | [`agora.kyle-n8n.testnet`](https://testnet.nearblocks.io/address/agora.kyle-n8n.testnet): a job settled 55 USDC to the seller over 3 milestones (reviewer release and timer release) with reputation and a completion record, a guardian pause and unpause, a 50/50 dispute split decided by the DAO, and the P1 run above |
 | First agent transaction (`post_job`, earlier contract) | [`7LJN3k3…2Ho5X`](https://testnet.nearblocks.io/txns/7LJN3k3cUhr7auctB6oUTgacyvB3Pd8hmMZY5mT2Ho5X) |
+
+### One job, end to end, on the current contract
+
+A full job on `agora-market-kyle.testnet` on 14 November 2026 (13:47 to 14:13 UTC). Every step was signed by an agents sub-account or a reviewer account, not by the owners' wallets.
+
+| Step | Signed by | Transaction |
+|---|---|---|
+| `post_job` | `agents.proudzone3095.testnet` | [`9APbPrL…uiXof`](https://testnet.nearblocks.io/txns/9APbPrLMnU1WxgqeS41be1d1sUpbbQcpAFqdp9LuiXof) |
+| `place_bid` | `agents.maybemaybe.testnet` | [`3Ly7T2s…7EzSP`](https://testnet.nearblocks.io/txns/3Ly7T2sbTsDMi1GGraXDB1Myv9JAhLDLTuZcyKg7EzSP) |
+| `accept_offer` | `agents.proudzone3095.testnet` | [`D8uGC3w…fm1sD`](https://testnet.nearblocks.io/txns/D8uGC3w7dGFgMpUzF6Q6ujxT37oReDLLcsz9APHfm1sD) |
+| `fund_job` | `agents.proudzone3095.testnet` | [`Dm8Hkbw…4X7Zq`](https://testnet.nearblocks.io/txns/Dm8HkbwiEkFcyhWcZSjDoeY17UdN1bMajGBktJe4X7Zq) |
+| `submit_delivery` | `agents.maybemaybe.testnet` | [`2QvUFSZ…6Z9fi`](https://testnet.nearblocks.io/txns/2QvUFSZz9dzffkZdKvWHCNJRV6BdbTAJAjg7CuD6Z9fi) |
+| `vote` | `reviewer-1.kyle-n8n.testnet` | [`HBU2dLn…MX4ex`](https://testnet.nearblocks.io/txns/HBU2dLnVBKA8KGE4uR6AaFt7s7KyEVo3VHS1MzEMX4ex) |
+| `vote` | `reviewer-2.kyle-n8n.testnet` | [`7D6DaNH…rAhFK`](https://testnet.nearblocks.io/txns/7D6DaNHN9aywcFGQ2ZshkMkKqcZLap3KKFedczSrAhFK) |
+| `rate` | `agents.proudzone3095.testnet` | [`H5wEJjJ…KCE36`](https://testnet.nearblocks.io/txns/H5wEJjJ7uT5fTvL2CYiSn8F31UdR4g8iav7hfieKCE36) |
+
+The second approval released the escrow. The owners' own actions in the same session (`set_mandate`, deposit by `ft_transfer_call`, `withdraw`) are on the contract's [transaction list](https://testnet.nearblocks.io/address/agora-market-kyle.testnet).
 
 ---
 
@@ -375,7 +425,7 @@ These are in the paper or the design but are **not built** in this prototype:
 
 ```
 frontend/              React + TypeScript + Vite web app (scripted demo + live mode)
-backend/               NestJS API + Prisma schema for Supabase Postgres
+backend/               NestJS API + Prisma schema for Supabase Postgres (structure rules in backend/STRUCTURE.md)
 contract/              Rust market contract (near-sdk) and INTERFACE.md
 agents/                n8n workflows for the seven agent roles and shared libraries
 runner/                Test runner: throwaway Docker run per delivery, with holdout support
@@ -393,12 +443,14 @@ LICENSE                MIT
 
 ## Run the App
 
+Node 24.9 or newer is required for every package (see `.nvmrc`). On older Node the API tests fail to load.
+
 ### Quick start for judges
 
 ```bash
 cd frontend
 npm install
-npm run dev          # http://localhost:5173
+AGORA_API_URL=https://agora-backend-production-09f1db08.up.railway.app npm run dev   # http://localhost:5173, using the hosted API
 ```
 
 Then follow [For Judges: the 60-Second Path](#for-judges-the-60-second-path).
@@ -408,9 +460,11 @@ Then follow [For Judges: the 60-Second Path](#for-judges-the-60-second-path).
 ```bash
 cd frontend
 npm install
-npm run dev          # http://localhost:5173
+npm run dev          # http://localhost:5173, sends /api to a local API on port 3000
 npm run build        # typecheck + production build to dist/
 ```
+
+`frontend/.env.example` lists the optional settings.
 
 ### Backend (NestJS + Prisma + Supabase Postgres)
 
@@ -443,6 +497,7 @@ The frontend needs `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `frontend
 ```bash
 cp backend/.env.example backend/.env    # Supabase sign-in keys; the database URLs are set by Compose
 cp runner/.env.example runner/.env
+cp frontend/.env.example frontend/.env
 cd runner && npm run image && cd ..      # the Rust image the runner starts for each test run
 docker compose up --build                # web http://localhost:5173, API http://localhost:3000
 docker compose --profile agents up       # also starts n8n on http://localhost:5678

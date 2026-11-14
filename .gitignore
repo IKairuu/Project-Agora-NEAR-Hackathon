@@ -3,3 +3,7 @@
 n8n-railway-api-key.txt
 n8n-apply.mjs
 n8n-backup/
+
+# OS and build files
+.DS_Store
+*.tsbuildinfo

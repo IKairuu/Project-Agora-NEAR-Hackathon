@@ -1,14 +1,13 @@
 [package]
 name = "contract"
-description = "cargo-near-new-project-description"
+description = "AGORA market contract: guarded USDC escrow, owner limits, test-verified release, disputes and reputation"
 version = "0.1.0"
 edition = "2024"
 resolver = "3"
 rust-version = "1.95"
-# TODO: Fill out the repository field to help NEAR ecosystem tools to discover your project.
 # NEP-0330 is automatically implemented for all contracts built with https://github.com/near/cargo-near.
 # Link to the repository will be available via `contract_source_metadata` view-function.
-repository = "https://github.com/<xxx>/<xxx>"
+repository = "https://github.com/SoftEng-Peeps/Agora-NEAR-Hackathon"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

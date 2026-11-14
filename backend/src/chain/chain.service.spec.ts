@@ -182,7 +182,7 @@ describe('ChainService (real mode)', () => {
         signAndSendTransaction.mockResolvedValue(ok(null));
         await service.callAs('platform', 'agora-testnet.testnet', 'register_seller', { account_id: 'x.testnet' }, '1');
         expect(getVaultSecret.mock.calls).toHaveLength(0);
-        expect(providerCtor.mock.calls[0]).toEqual([{ url: 'https://rpc.example.test' }]);
+        expect(providerCtor.mock.calls[0]![0]).toEqual({ url: 'https://rpc.example.test' });
         expect(functionCall.mock.calls[0]![3]).toBe(1n);
         const { service: owner } = await build(jest.fn().mockResolvedValue(KEY));
         await owner.callAs('owner', 'lumen.testnet', 'withdraw', { amount: '1' }, '1');
