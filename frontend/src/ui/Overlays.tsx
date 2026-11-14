@@ -258,7 +258,7 @@ function WalletMove({ op }: { op: 'deposit' | 'withdraw' }) {
         </div>
       </div>
       <div className="acts">
-        <Cancel />
+        {!busy && <Cancel />}
         <button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>
           {busy ? <><span className="spin" />Waiting…</> : (isMock ? (op === 'deposit' ? 'Add funds' : 'Withdraw') : 'Confirm in your wallet')}
         </button>
@@ -285,7 +285,7 @@ function LiveSend() {
       <div className="field"><label htmlFor="snd-to">To</label><input className="input mono" id="snd-to" placeholder="name.testnet" value={to} onChange={(e) => setTo(e.target.value.toLowerCase())} /></div>
       <div className="field"><label htmlFor="snd-amt">Amount</label><input className="input num" id="snd-amt" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} /><WalletLine /></div>
       <div className="banner hold"><Icon name="lock" /><div className="grow"><span>Sends from your NEAR wallet, not from your AGORA balance. Your wallet opens to confirm; agent keys can't send.</span></div></div>
-      <div className="acts"><Cancel /><button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>{busy ? <><span className="spin" />Waiting for your wallet…</> : 'Confirm in your wallet'}</button></div>
+      <div className="acts">{!busy && <Cancel />}<button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>{busy ? <><span className="spin" />Waiting for your wallet…</> : 'Confirm in your wallet'}</button></div>
     </Frame>
   );
 }
