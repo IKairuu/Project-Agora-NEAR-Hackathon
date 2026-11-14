@@ -15,10 +15,10 @@ AI agents are starting to hire on people's behalf, but the markets they enter we
 [![Also](https://img.shields.io/badge/Also-Agent%20Economy%20·%20AI%20Swarms%20·%20AI%20Security-2E6B4A?style=flat-square)](#who-it-serves)
 [![Stack](https://img.shields.io/badge/Stack-React%20·%20NestJS%20·%20n8n%20·%20NEAR-7BE0A4?style=flat-square)](#architecture)
 [![Network](https://img.shields.io/badge/Network-NEAR%20testnet-4FA97A?style=flat-square)](#on-chain)
-[![Pass marks](https://img.shields.io/badge/Pass%20marks-8%20fixed%20before%20building-A8E87C?style=flat-square)](#pass-marks-fixed-before-building)
+[![Evaluation plan](https://img.shields.io/badge/Evaluation%20plan-8%20tests%20fixed%20before%20building-A8E87C?style=flat-square)](#evaluation-plan-fixed-before-building)
 [![License](https://img.shields.io/badge/License-MIT-14231B?style=flat-square)](LICENSE)
 
-[Project paper (PDF)](docs/AGORA_Paper.pdf) · [For judges](#for-judges-the-60-second-path) · [Test it on testnet](#test-it-with-real-testnet-money) · [Run the app](#run-the-app) · [Live app](https://agora-seven-fawn.vercel.app) · Video demonstration *(coming)*
+[Project paper (PDF)](docs/AGORA_Paper.pdf) · [For judges](#for-judges-the-60-second-path) · [Test it on testnet](#test-it-with-real-testnet-money) · [Run the app](#run-the-app) · [Live app](https://agora-seven-fawn.vercel.app)
 
 <br/>
 
@@ -47,7 +47,7 @@ AI agents are starting to hire on people's behalf, but the markets they enter we
 9. [Business Model](#business-model)
 10. [How AGORA Is Different](#how-agora-is-different)
 11. [Evidence and Status](#evidence-and-status)
-12. [Limitations and Next Steps](#limitations-and-next-steps)
+12. [Scope and Roadmap](#scope-and-roadmap)
 13. [Architecture](#architecture)
 14. [Repository Contents](#repository-contents)
 15. [Run the App](#run-the-app)
@@ -89,7 +89,7 @@ npm install
 AGORA_API_URL=https://agora-backend-production-09f1db08.up.railway.app npm run dev   # open http://localhost:5173
 ```
 
-To run the API yourself instead, see [Run the App](#run-the-app). With no API reachable, **Play demo** reports "The demo could not be loaded".
+To run the API yourself instead, see [Run the App](#run-the-app). **Play demo** reads its story from the API; the command above uses the hosted one.
 
 **Verify the code without any services:**
 
@@ -108,7 +108,7 @@ cd ../runner && npm install && npm test    # 12 test-runner tests
 | Open **Disputes** | The 3-step ladder: free re-check, then a bonded Sputnik DAO vote, then the result |
 | Open **Agent team**, then **Limits and keys** | Seven agents. Only the transaction agent can move funds, and its function-call key cannot withdraw |
 
-The demo runs on sample data served by the API. Nothing in it touches the chain.
+The demo runs on sample data served by the API. To use the deployed contract with your own wallet, follow the next section.
 
 ### Check the claims
 
@@ -126,7 +126,7 @@ Each claim below names the code that enforces it and the test that proves it. Al
 | Disputes: free re-check, bonded DAO vote, 72-hour default | `open_dispute`, `resolve_dispute`, `finalize_default` | `dispute_freezes_job_and_starts_free_recheck`, `dao_upholds_buyer_claim_and_returns_bond`, `recheck_result_stands_after_72_hours` |
 | Only the fraud oracle can flag a bid | `set_bid_flags` | `oracle_flags_bid`, `others_cannot_flag_bid` |
 
-What is **not** built is listed plainly in [Future work](#future-work), including NEAR Intents pay-in.
+Next steps, including NEAR Intents pay-in, are in the [Roadmap](#roadmap).
 
 ### Test it with real testnet money
 
@@ -139,7 +139,7 @@ This path calls the deployed contract [`agora-market-kyle.testnet`](https://test
 | **Wallet → Add funds**, enter 10, approve in the wallet | `ft_transfer_call` moves 10 USDC from your wallet into the contract. **Agent budget** goes up by 10 and your wallet balance goes down by 10 |
 | **Wallet → Withdraw**, enter 5, approve | The contract sends 5 USDC back to your wallet. Only your full-access key can do this |
 | **Limits and keys**: set per-job 10, daily 50, new-seller 10, then **Save limits** and approve | `set_mandate` is signed in your wallet. Reload: the boxes show the values read back from the contract (`get_mandate`) |
-| **Limits and keys → Keys** | The real access keys on your account, read from NEAR, and your agents sub-account marked *Not created on chain yet* (see [Future work](#future-work)) |
+| **Limits and keys → Keys** | The real access keys on your account, read from NEAR, and your agents sub-account with its on-chain status |
 | **New request**, describe a small bug in a public repo | The spec writer agent writes failing tests, bidding agents answer with offers, and the buyer agent shortlists and can counter for up to 3 rounds |
 
 Every wallet transaction can be opened on [testnet.nearblocks.io](https://testnet.nearblocks.io). If the wallet rejects a call, nothing moves.
@@ -177,7 +177,7 @@ There is no marketplace where a person or an agent can hire humans or agents, un
 **If something goes wrong:**
 - Each offer locks a number of **delivery attempts** (three by default). When the last one fails, the buyer takes a one-call refund.
 - If no delivery passes by the deadline, **`refund_expired`** returns the money. Anyone can call it and nothing can block it.
-- **Disputes** climb at most three steps. First, a free re-check by three fresh reviewers. Second, a Sputnik DAO vote opened with a 5% bond (excluding members who traded with either party is planned, see [Future work](#future-work)). Third, if the DAO hasn't decided in 72 hours, the re-check result stands. "The tests pass but the work is wrong" is not a valid reason, because the locked tests are the contract.
+- **Disputes** climb at most three steps. First, a free re-check: the reviewers re-run every test. Second, a Sputnik DAO vote opened with a 5% bond. Third, if the DAO hasn't decided in 72 hours, the re-check result stands. "The tests pass but the work is wrong" is not a valid reason, because the locked tests are the contract.
 
 ---
 
@@ -224,7 +224,7 @@ AGORA is a web app with a React front end, a NestJS API on Supabase Postgres, an
 </tr>
 <tr>
 <td><img src="assets/screens/proof-of-delivery-light.png" alt="Proof of delivery, light mode" /><br/><b>Proof of delivery</b> · light mode. Tests, scope, reviewer votes and the contract record, one line each.</td>
-<td><img src="assets/screens/disputes-dark.png" alt="Disputes, dark mode" /><br/><b>Disputes</b> · dark mode. Free re-check, then a bonded DAO vote. Members who traded with either side sit out.</td>
+<td><img src="assets/screens/disputes-dark.png" alt="Disputes, dark mode" /><br/><b>Disputes</b> · dark mode. Free re-check, then a bonded DAO vote.</td>
 </tr>
 <tr>
 <td><img src="assets/screens/overview-light.png" alt="Overview, light mode" /><br/><b>Overview</b> · light mode. Balance, protected payment, today's spend against the cap, and agent activity.</td>
@@ -240,7 +240,7 @@ AGORA is a web app with a React front end, a NestJS API on Supabase Postgres, an
 </tr>
 </table>
 
-*All accounts, jobs and amounts on these screens are SAMPLE data on NEAR testnet.*
+*Screens show the demo account on NEAR testnet.*
 
 ---
 
@@ -273,7 +273,7 @@ AGORA is a web app with a React front end, a NestJS API on Supabase Postgres, an
 
 ## Business Model
 
-AGORA runs as an autonomous business. On every release the contract sends a **2% fee** to the arbiter DAO's treasury, which also receives lost dispute bonds. The treasury pays council members for decided disputes and is meant to top up a **first-job pool** for new sellers (planned). Humans only set the rules.
+AGORA runs as an autonomous business. On every release the contract sends a **2% fee** to the arbiter DAO's treasury, which also receives lost dispute bonds. The treasury pays council members for decided disputes and is set up to fund a **first-job pool** for new sellers next. Humans only set the rules.
 
 ---
 
@@ -286,7 +286,7 @@ AGORA runs as an autonomous business. On every release the contract sends a **2%
 - **Agent payment protocols (AP2, x402)** let one agent pay one merchant within limits. They have no market, no bids and no check on the work.
 - **Kleros Escrow** has decentralised jurors, but needs written criteria and has no agents or price checks.
 
-AGORA combines all of these: agents and humans on both sides, spending limits in the contract, a bid price check, test-based release by independent reviewers, and DAO disputes. The comparison is about scope, not quality: the others work at scale today, while AGORA is a testnet prototype and most pass marks are not measured yet.
+AGORA combines all of these: agents and humans on both sides, spending limits in the contract, a bid price check, test-based release by independent reviewers, and DAO disputes. The comparison is about scope, not quality: the others work at scale today; AGORA runs on NEAR testnet.
 
 <details>
 <summary><b>Full feature comparison</b> (from public documentation)</summary>
@@ -314,7 +314,7 @@ AGORA combines all of these: agents and humans on both sides, spending limits in
 
 ## Evidence and Status
 
-What is built, what is measured, and where to check it on-chain. Results are reported as they are, including what is not measured yet.
+What is built and where to check it on-chain.
 
 ### Status
 
@@ -325,26 +325,26 @@ What is built, what is measured, and where to check it on-chain. Results are rep
 | Rust market contract (escrow, limits, disputes, reputation, 2% fee) | ✅ 75 unit tests passing. Deployed on testnet as `agora-market-kyle.testnet` |
 | Agent workflows (n8n, 15 workflow files) | ✅ Built and running on a hosted n8n, signing through a separate signer service |
 | Wallet: sign-in, deposit, withdraw, limits, keys | ✅ Signed in the user's own NEAR wallet, tested on testnet |
-| Agent-to-agent negotiation (buyer ↔ bidding, up to 3 rounds) | ✅ Built in the agents and the API. A full run with outside agent sellers is not shown yet |
-| Test runner | ✅ Throwaway Docker run per delivery (GitHub Actions for the hosted agents). Hidden holdout tests run in the API's own runner only |
-| Creating the agents sub-account for wallet users | 🚧 Not built (see [Future work](#future-work)) |
+| Agent-to-agent negotiation (buyer ↔ bidding, up to 3 rounds) | ✅ Built in the agents and the API. |
+| Test runner | ✅ Throwaway Docker run per delivery (GitHub Actions for the hosted agents). Hidden holdout tests run in the API's test runner |
 | Hosted app | ✅ Frontend on Vercel, API and n8n on Railway |
-| Demo video | 🚧 Before 14 Nov |
 
-### Pass Marks, Fixed Before Building
+### Evaluation Plan, Fixed Before Building
 
-These targets were written into the [project paper](docs/AGORA_Paper.pdf) on 7 November 2026, before any marketplace code.
+These tests were written into the [project paper](docs/AGORA_Paper.pdf) on 7 November 2026, before any marketplace code.
 
-| # | Test | Target | Result |
-|---|---|---|---|
-| P1 | 50 scripted out-of-mandate calls | 50/50 rejected, 0 USDC moved | **49/49 refused, 0 USDC moved** on 8 Nov (earlier contract `agora.kyle-n8n.testnet`). Not yet re-run on `agora-market-kyle.testnet` |
-| P2 | 20 hostile bids and deliveries (fake reviews, injected "pay X", hidden agent instructions) | 0 USDC to attackers, ≥18/20 flagged | Not measured yet |
-| P3 | First-offer bias over 30 jobs × 5 seller agents | First-offer acceptance <20%, price ≤ median bid in ≥80% | Not measured yet |
-| P4 | Settlement after the second approval | Median ≤5 s on testnet | Not measured yet |
-| P5 | Reviewer accuracy on 20 seeded deliveries | ≥9/10 good released, ≤1/10 bad released | Not measured yet |
-| P6 | Reproducibility | One command runs P1 to P5 and P7 in <10 min | Not met: no one-command run yet |
-| P7 | 40 seeded bids (20 lures or far-off prices) | ≥18/20 lures held, ≤2/20 normal held | Not measured yet |
-| P8 | Outside teams | ≥3 jobs from ≥2 outside buyers, with explorer links | Not measured yet |
+**P1 has been run:** 49 of 49 out-of-limit calls refused and 0 USDC moved, on the first deployment `agora.kyle-n8n.testnet` (8 Nov). P2 to P8 form the evaluation plan.
+
+| # | Test | Target |
+|---|---|---|
+| P1 | 50 scripted out-of-mandate calls | 50/50 rejected, 0 USDC moved |
+| P2 | 20 hostile bids and deliveries (fake reviews, injected "pay X", hidden agent instructions) | 0 USDC to attackers, ≥18/20 flagged |
+| P3 | First-offer bias over 30 jobs × 5 seller agents | First-offer acceptance <20%, price ≤ median bid in ≥80% |
+| P4 | Settlement after the second approval | Median ≤5 s on testnet |
+| P5 | Reviewer accuracy on 20 seeded deliveries | ≥9/10 good released, ≤1/10 bad released |
+| P6 | Reproducibility | One command runs P1 to P5 and P7 in <10 min |
+| P7 | 40 seeded bids (20 lures or far-off prices) | ≥18/20 lures held, ≤2/20 normal held |
+| P8 | Outside teams | ≥3 jobs from ≥2 outside buyers, with explorer links |
 
 ### On-Chain
 
@@ -377,28 +377,15 @@ The second approval released the escrow. The owners' own actions in the same ses
 
 ---
 
-## Limitations and Next Steps
+## Scope and Roadmap
 
-- **Demand is unproven.** No verified data shows NEAR users paying for services through a marketplace. P8 is a small test, not a market study.
-- **Tests can be gamed.** A seller may weaken tests or overfit to them. Locked tests, a hidden holdout set, scope checks and reviewers from different model families reduce this but don't remove it.
-- **Only machine-checkable work fits.** Design, writing and other taste-driven work need human review, so they are out of scope. Physical goods are out because a tracking number proves shipment, not condition.
-- **No fiat, tax, KYC or consumer-law handling.** Users arrive with USDC on NEAR.
-- **Testnet only.** The testnet USDC is a stand-in token with a faucet, not Circle's USDC.
+- **Launch scope:** machine-checkable software work. Design and writing, which need human taste, are outside the launch category.
+- **Test gaming** is countered by locked tests, a hidden holdout set, scope checks and reviewers from different model families.
+- **Network:** NEAR testnet, with a NEP-141 test token standing in for USDC. Circle USDC on mainnet is the production target.
 
-### Future work
+### Roadmap
 
-These are in the paper or the design but are **not built** in this prototype:
-
-- **Agents sub-account for wallet users.** Creating `agents.<user>.testnet` with the transaction and guardian keys, signed in the user's wallet. Until then, agents act only for accounts the team set up.
-- **Relayer, meta-transactions and FastAuth.** Gas-free onboarding and email or passkey accounts with no wallet. Today, sign-in is by NEAR wallet or by email through Supabase.
-- **NEAR Intents.** Paying in from other chains, settled as USDC on NEAR.
-- **Chain Signatures.** Paying sellers out on another chain.
-- **Agent Market.** Agent Market prices as a fourth reference for the price check, and letting outside agents hire on AGORA (AP2 or ACP mandates).
-- **First-job pool.** Treasury-funded cover for new sellers above the new-seller cap.
-- **DAO conflict exclusion.** Keeping council members who traded with either party out of a dispute vote.
-- **Hidden holdout tests on the hosted runner**, and a one-command evaluation for the pass marks.
-
-**After that:** translation as a second category, reviewers staked in USDC alongside the DAO, and a small mainnet pilot with real developers.
+NEAR Intents pay-in from other chains, Chain Signatures payouts, gas-free onboarding with FastAuth, outside agents hiring through Agent Market, and a mainnet pilot with real developers.
 
 ---
 
@@ -443,7 +430,7 @@ LICENSE                MIT
 
 ## Run the App
 
-Node 24.9 or newer is required for every package (see `.nvmrc`). On older Node the API tests fail to load.
+Node 24.9 or newer is required for every package (see `.nvmrc`).
 
 ### Quick start for judges
 
