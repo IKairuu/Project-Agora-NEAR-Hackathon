@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { DONE_JOBS, gigBy, ME, OTHER_JOBS, ROLES, usd, VIA } from '../data/data';
 import { act, go, orderAct, TOUR } from '../store/actions';
-import { liveLinkWallet, liveRemoveJob, liveWalletMove, liveWalletSendUsdc, loadWalletBalances } from '../lib/live';
+import { isLive, liveAddFunds, liveLinkWallet, liveRemoveJob, liveWalletMove, liveWalletSendUsdc, liveWithdraw, loadWalletBalances, walletMode } from '../lib/live';
 import { connectedAccount, disconnectWallet, NEAR_NETWORK, pickWallet, proveOwnership, proveSignIn } from '../lib/near';
 import { closeModal, free, hPrice, setState, toast, useApp, useToasts } from '../store/store';
 import { authConfigured } from '../lib/supabase';
@@ -206,26 +206,63 @@ function WalletLine() {
   return <span className="hint">In your NEAR wallet: {walletBal.usdc === null ? 'USDC token not set' : `${usd(walletBal.usdc)} USDC`}, {walletBal.near.toFixed(2)} NEAR for gas</span>;
 }
 
-/** Real chain mode: Add funds (ft_transfer_call from the wallet) or Withdraw (contract back to the wallet), signed in the wallet. */
+/** Real chain mode or mock: Add funds (ft_transfer_call or mock deposit) or Withdraw, signed in the wallet or via mock. */
 function WalletMove({ op }: { op: 'deposit' | 'withdraw' }) {
   const s = useApp();
   const [amt, setAmt] = useState('10.00');
   const [busy, setBusy] = useState(false);
+  const isMock = !walletMode();
+
   const go = async () => {
     const n = amountIn(amt);
     if (!n) { toast('Enter an amount above 0.', 'hold'); return; }
     if (op === 'withdraw' && n > free(s)) { toast(`You have ${usd(free(s))} USDC free to withdraw.`, 'hold'); return; }
     setBusy(true);
-    if (await liveWalletMove(op, n)) closeModal(); else setBusy(false);
+
+    if (!isLive()) {
+      setState((prev) => ({ money: Math.max(0, op === 'deposit' ? prev.money + n : prev.money - n) }));
+      toast(op === 'deposit' ? `${n.toFixed(2)} test USDC added.` : `${n.toFixed(2)} USDC withdrawn.`);
+      closeModal();
+      return;
+    }
+
+    const ok = isMock
+      ? (op === 'deposit' ? await liveAddFunds(n) : await liveWithdraw(n))
+      : await liveWalletMove(op, n);
+
+    if (ok) closeModal();
+    else setBusy(false);
   };
+
   return (
     <Frame>
-      <h2>{op === 'deposit' ? 'Add funds from your wallet' : 'Withdraw to your wallet'}</h2>
-      <p className="muted">{op === 'deposit' ? 'Moves USDC from your NEAR wallet into your AGORA balance with ft_transfer_call. Your agents can spend it only inside your limits.' : 'Sends free USDC from your AGORA balance back to your NEAR wallet. Money locked in Protected payment stays put.'}</p>
-      <div className="field"><label htmlFor="wm-amt">Amount (USDC)</label><input className="input num" id="wm-amt" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} />
-        {op === 'deposit' ? <WalletLine /> : <span className="hint">{usd(free(s))} USDC free in AGORA</span>}</div>
-      <div className="banner hold"><Icon name="lock" /><div className="grow"><span>Your wallet opens to confirm. It needs your full-access key, so agent keys can never do this.</span></div></div>
-      <div className="acts"><Cancel /><button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>{busy ? <><span className="spin" />Waiting for your wallet…</> : 'Confirm in your wallet'}</button></div>
+      <h2>{op === 'deposit' ? (isMock ? 'Add test USDC' : 'Add funds from your wallet') : (isMock ? 'Withdraw USDC' : 'Withdraw to your wallet')}</h2>
+      <p className="muted">
+        {op === 'deposit'
+          ? (isMock
+              ? 'Adds test USDC directly to your AGORA balance so your agents can fund jobs.'
+              : 'Moves USDC from your NEAR wallet into your AGORA balance with ft_transfer_call. Your agents can spend it only inside your limits.')
+          : (isMock
+              ? 'Sends free USDC from your AGORA balance back to your account.'
+              : 'Sends free USDC from your AGORA balance back to your NEAR wallet. Money locked in Protected payment stays put.')}
+      </p>
+      <div className="field">
+        <label htmlFor="wm-amt">Amount (USDC)</label>
+        <input className="input num" id="wm-amt" inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} autoFocus />
+        {op === 'deposit' ? (walletMode() ? <WalletLine /> : <span className="hint">Current balance: {usd(free(s))} USDC</span>) : <span className="hint">{usd(free(s))} USDC free in AGORA</span>}
+      </div>
+      <div className="banner hold">
+        <Icon name="lock" />
+        <div className="grow">
+          <span>{isMock ? 'Mock test mode: changes apply directly to your account.' : 'Your wallet opens to confirm. It needs your full-access key, so agent keys can never do this.'}</span>
+        </div>
+      </div>
+      <div className="acts">
+        <Cancel />
+        <button className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void go()}>
+          {busy ? <><span className="spin" />Waiting…</> : (isMock ? (op === 'deposit' ? 'Add funds' : 'Withdraw') : 'Confirm in your wallet')}
+        </button>
+      </div>
     </Frame>
   );
 }

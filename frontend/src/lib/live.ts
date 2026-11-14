@@ -769,11 +769,12 @@ export async function liveUnpause(): Promise<boolean> {
   return true;
 }
 
-export async function liveWithdraw(): Promise<void> {
-  const amount = Number((window.prompt('Withdraw how many USDC?', '') ?? '').replace(/[^\d.]/g, ''));
-  if (!amount) return;
+export async function liveWithdraw(amt?: number): Promise<boolean> {
+  const amount = amt !== undefined ? amt : Number((window.prompt('Withdraw how many USDC?', '') ?? '').replace(/[^\d.]/g, ''));
+  if (!amount) return false;
   const res = await api('/wallet/v1/withdraw', { body: { amount } }).catch(() => null);
-  if (res) { toast(`${amount.toFixed(2)} USDC withdrawn with your full-access key.`); await refreshAll(false); }
+  if (res) { toast(`${amount.toFixed(2)} USDC withdrawn with your full-access key.`); await refreshAll(false); return true; }
+  return false;
 }
 
 /**
@@ -862,11 +863,12 @@ export async function liveFaucet(): Promise<boolean> {
 }
 
 /** Mock chain only: adds test USDC so jobs can be funded. */
-export async function liveAddFunds(): Promise<void> {
-  const amount = Number((window.prompt('Add how many test USDC?', '100') ?? '').replace(/[^\d.]/g, ''));
-  if (!amount) return;
+export async function liveAddFunds(amt?: number): Promise<boolean> {
+  const amount = amt !== undefined ? amt : Number((window.prompt('Add how many test USDC?', '100') ?? '').replace(/[^\d.]/g, ''));
+  if (!amount) return false;
   const res = await api('/wallet/v1/deposit', { body: { amount } }).catch(() => null);
-  if (res) { toast(`${amount.toFixed(2)} test USDC added.`); await refreshAll(false); }
+  if (res) { toast(`${amount.toFixed(2)} test USDC added.`); await refreshAll(false); return true; }
+  return false;
 }
 
 export async function liveRate(stars: number): Promise<void> {
