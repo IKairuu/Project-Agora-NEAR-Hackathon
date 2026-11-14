@@ -26,6 +26,8 @@ const I = {
   chat: 'M4 5h16v11H9l-5 4z',
   up: 'M12 19V5M5 12l7-7 7 7',
   down: 'M12 5v14M5 12l7 7 7-7',
+  send: 'M7 17 17 7M9 7h8v8',
+  receive: 'M17 7 7 17M15 17H7V9',
   store: 'M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9h16M9 20v-6h6v6',
   out: 'M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10',
   copy: 'M9 9h11v11H9zM5 15H4V4h11v1',

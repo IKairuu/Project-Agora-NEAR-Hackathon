@@ -218,8 +218,8 @@ export function Wallet() {
               : <><span className="total num">${d}<span className="c">.{c}</span></span><span className="sub">Free {usd(free(s))} · Locked in jobs {usd(escrow(s))}</span></>}
             <p className="note">{mock ? 'Test money: the server runs in mock mode, so nothing here is on chain.' : 'Your agents can spend this, only inside your limits.'}</p>
             <div className="wal-acts two">
-              <button className="pri" onClick={act.addfunds}><i><Icon name="plus" /></i>Add funds</button>
-              <button onClick={act.withdrawme}><i><Icon name="out" /></i>Withdraw</button>
+              <button className="btn primary wal-btn" onClick={act.addfunds}><Icon name="plus" />Add funds</button>
+              <button className="btn wal-btn" onClick={act.withdrawme}><Icon name="out" />Withdraw</button>
             </div>
           </section>
           <section className="wal-card panel" aria-labelledby="wal-own">
@@ -232,10 +232,10 @@ export function Wallet() {
             {s.live && s.walletErr && <button className="btn sm" onClick={() => void loadWalletBalances()}>Retry</button>}
             <p className="note">Only you can spend this. Agents can't touch it.</p>
             {s.live && s.walletBal && s.chain?.usdc && s.chain.network === 'testnet' && <button className="btn sm" disabled={faucetBusy} aria-busy={faucetBusy} onClick={() => { setFaucetBusy(true); void liveFaucet().finally(() => setFaucetBusy(false)); }}><Icon name="plus" />{faucetBusy ? 'Waiting for your wallet…' : 'Get 50 test USDC'}</button>}
-            {s.live && <button className="lk small" onClick={() => setState({ modal: { kind: 'linkwallet' } })}><Icon name="wallet" />{s.walletBal ? 'Link a different wallet' : 'Link your own NEAR wallet'}</button>}
+            {s.live && <button className="btn sm wal-link" onClick={() => setState({ modal: { kind: 'linkwallet' } })}><Icon name="wallet" />{s.walletBal ? 'Link a different wallet' : 'Link your own NEAR wallet'}</button>}
             <div className="wal-acts two">
-              <button onClick={act.send}><i><Icon name="up" /></i>Send</button>
-              <button onClick={act.receive}><i><Icon name="down" /></i>Receive</button>
+              <button className="btn wal-btn wal-send" onClick={act.send}><Icon name="send" />Send</button>
+              <button className="btn wal-btn wal-receive" onClick={act.receive}><Icon name="receive" />Receive</button>
             </div>
           </section>
         </div>

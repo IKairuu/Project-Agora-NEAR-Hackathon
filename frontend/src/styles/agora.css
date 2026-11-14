@@ -410,7 +410,7 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.5; }
 .wal-card .total .c { color: var(--color-muted); }
 .wal-card .sub { font-size: var(--text-xs); color: var(--color-muted); }
 .wal-acts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-xs); width: 100%; margin-top: var(--space-lg); }
-.wal-acts button { display: flex; flex-direction: column; align-items: center; gap: var(--space-xs); border: 0; background: none; cursor: pointer; font-size: var(--text-xs); color: var(--color-ink-2); padding: var(--space-2xs) 0; border-radius: 12px; }
+.wal-acts button:not(.btn) { display: flex; flex-direction: column; align-items: center; gap: var(--space-xs); border: 0; background: none; cursor: pointer; font-size: var(--text-xs); color: var(--color-ink-2); padding: var(--space-2xs) 0; border-radius: 12px; }
 .wal-acts button i { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in oklab, var(--color-ink) 8%, transparent); color: var(--color-ink); transition: transform var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out); }
 .wal-acts button.pri i { background: var(--accent-fill); color: var(--color-accent-ink); }
 .wal-acts button:hover i { transform: translateY(-2px); }
@@ -423,7 +423,13 @@ textarea.input { min-height: 120px; resize: vertical; line-height: 1.5; }
 .wal-card .total.loading { color: var(--color-muted); }
 .wal-card .note { font-size: var(--text-xs); color: var(--color-ink-2); margin: var(--space-xs) 0 0; max-width: 32ch; }
 .wal-card .lk.small { margin-top: var(--space-2xs); }
-.wal-acts.two { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: auto; padding-top: var(--space-md); }
+.wal-acts.two { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: auto; padding-top: var(--space-md); border-top: 1px solid var(--color-rule-2); width: 100%; gap: var(--space-sm); }
+.wal-btn { width: 100%; min-height: 44px; font-weight: 500; font-size: var(--text-sm); border-radius: var(--radius-pill); }
+.wal-send .ic { color: var(--color-accent-text, #34d399); }
+.wal-receive .ic { color: var(--color-info, #2dd4bf); }
+.wal-card .wal-link { margin-top: var(--space-xs); margin-bottom: var(--space-xs); border-color: var(--color-rule-2); background: color-mix(in oklab, var(--color-ink) 4%, transparent); }
+.wal-card .wal-link:hover { border-color: var(--color-muted); background: color-mix(in oklab, var(--color-ink) 8%, transparent); }
+.wal-card .wal-link .ic { color: var(--color-accent); }
 .asset { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-sm); align-items: center; padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--color-rule); }
 .asset:last-child { border-bottom: 0; }
 .asset .tok { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: var(--text-xs); background: var(--color-info-soft); color: var(--color-info); }
